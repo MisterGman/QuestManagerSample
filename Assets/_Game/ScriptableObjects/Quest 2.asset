@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 767283a46813e5b439b3414a8e57c856, type: 3}
+  m_Name: Quest 2
+  m_EditorClassIdentifier: 
+  nameQuest: Second Quest
+  objective:
+  - {fileID: 11400000, guid: 603cabeaff54ea543bfa975ceb180acd, type: 2}
+  - {fileID: 11400000, guid: a33cbed512554fa42b8c0237d9313673, type: 2}
+  rewardQuest: 100

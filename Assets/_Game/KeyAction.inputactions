@@ -1,0 +1,33 @@
+{
+    "name": "KeyAction",
+    "maps": [
+        {
+            "name": "ToggleUI",
+            "id": "941bd0a9-2724-4ef0-a2e4-fd83647aff29",
+            "actions": [
+                {
+                    "name": "Tab",
+                    "type": "Button",
+                    "id": "4b86ac1a-fe99-470b-9424-c5539da7235a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "8fab7386-459a-4aee-90ca-54ef90a4933e",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Tab",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

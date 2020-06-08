@@ -3220,7 +3220,6 @@ MonoBehaviour:
   - {fileID: 7534738396794694474}
   moneyText: {fileID: 3321763011659724283}
   toggleButton: {fileID: 8382772108347301451}
-  tooltipText: {fileID: 753738121642481901}
   questMan: {fileID: 8269688203511916860}
   durationMovement: 1
 --- !u!1 &4170446570074311989
@@ -8022,6 +8021,7 @@ GameObject:
   - component: {fileID: 8009347616048675686}
   - component: {fileID: 5244013144673069930}
   - component: {fileID: 8269688203511916860}
+  - component: {fileID: 3591645418724671253}
   m_Layer: 5
   m_Name: QuestCurrent
   m_TagString: Untagged
@@ -8129,6 +8129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a264b99dd2f7bfd49bd76ec369c5a29f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tooltipTextSO: {fileID: 11400000, guid: 6962c39bfcca2f8478f0938cb224b88d, type: 2}
   quests:
   - {fileID: 11400000, guid: 5361aaf6f25a86540a246f8c118a5310, type: 2}
   - {fileID: 11400000, guid: 0bef9512a615eaa4a8cd6878680f5c2b, type: 2}
@@ -8142,6 +8143,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 603cabeaff54ea543bfa975ceb180acd, type: 2}
   - {fileID: 11400000, guid: a33cbed512554fa42b8c0237d9313673, type: 2}
   moneyText: {fileID: 5729239058979194196}
+--- !u!114 &3591645418724671253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8975039899512672396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a9f15cf2318c17428bc16aa2a30b873, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tooltipText: {fileID: 753738121642481901}
 --- !u!1 &8976451228374566989
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 767283a46813e5b439b3414a8e57c856, type: 3}
-  m_Name: Quest 1
+  m_Script: {fileID: 11500000, guid: bf64a6407edfc2848a0199ed76b0c603, type: 3}
+  m_Name: TooltipText
   m_EditorClassIdentifier: 
-  questName: First Quest
-  objective:
-  - {fileID: 11400000, guid: 58ee426c2f5f1a24eb9cd0220533d4bc, type: 2}
-  - {fileID: 11400000, guid: 58ee426c2f5f1a24eb9cd0220533d4bc, type: 2}
-  rewardQuest: 50
+  questActive: '{0} was activated'
+  questFinished: '{0} was finished'
+  noMoreQuest: No more quests
+  objectiveSubmitted: '{0} was submitted'
+  wrongObjective: Wrong objective

@@ -6,15 +6,14 @@ namespace _Game._Scripts
     [CreateAssetMenu(menuName = "Scriptable Object/Objective", fileName = "ObjectiveSO")]
     public class ObjectiveSO : ScriptableObject
     {
-
         [field : SerializeField,
                  Tooltip("Name of objective")]
-        private string nameObjective;
+        private string objectiveName;
 
         /// <summary>
         /// Name of objective
         /// </summary>
-        public string NameObjective => nameObjective;
+        public string ObjectiveName => objectiveName;
         
         [field : SerializeField,
                  Tooltip("Description (sprites) of objective")]

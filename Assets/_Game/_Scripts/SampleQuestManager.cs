@@ -7,11 +7,17 @@ namespace _Game._Scripts
 {
     public class SampleQuestManager : MonoBehaviour
     {
-
         #region Variables
 
         #region InspectorVisible
 
+        /// <summary>
+        /// Tooltip text keeper
+        /// </summary>
+        [field : SerializeField,
+                 Tooltip("Tooltip text keeper")] 
+        private TooltipTextSO tooltipTextSO;
+        
         /// <summary>
         /// All quests 
         /// </summary>
@@ -79,44 +85,57 @@ namespace _Game._Scripts
 
         /// <summary>
         /// Index which informs current quest count
+        /// 0 based
         /// </summary>
         private int _currentQuestIndex;
-        
-        /// <summary>
-        /// Informs if quest is currently active
-        /// </summary>
+
         private bool _isQuestActive;
+        
+        private float _currentMoney;
+
+        private QuestSO _currentQuest;
+
+        private List<ObjectiveSO> _submittedObjectives = new List<ObjectiveSO>();
         
         /// <summary>
         /// Current quest
         /// </summary>
-        private QuestSO _currentQuest;
-
-        private float _currentMoney;
+        public bool IsQuestActive => _isQuestActive;
         
         /// <summary>
         /// Objectives of current quest that player have already submitted
         /// </summary>
-        private List<ObjectiveSO> _submittedObjectives = new List<ObjectiveSO>();
-        
-        public bool IsQuestActive => _isQuestActive;
         public List<ObjectiveSO> SubmittedObjectives => _submittedObjectives;
         
         #endregion
 
         #endregion
         
-        #region Evemts
+        #region Events
 
         public delegate void QuestActive(QuestSO questSo);
-        public QuestActive QuestActiveEvent;        
-        
         public delegate void ActionPerformed();
-        public ActionPerformed ObjectiveSubmittedEvent;
-        public ActionPerformed QuestFinishedEvent;
-
         public delegate void TooltipAction(string text);
-        public TooltipAction TooltipActionEvent;
+
+        /// <summary>
+        /// When quest activates
+        /// </summary>
+        public event QuestActive QuestActiveEvent;        
+        
+        /// <summary>
+        /// Invokes when objective to the current quest is submitted
+        /// </summary>
+        public event ActionPerformed ObjectiveSubmittedEvent;
+        
+        /// <summary>
+        /// Invokes when current quest is finished
+        /// </summary>
+        public event ActionPerformed QuestFinishedEvent;
+
+        /// <summary>
+        /// Invokes when info needs to be presented
+        /// </summary>
+        public event TooltipAction TooltipActionEvent;
         
         #endregion
 
@@ -126,17 +145,15 @@ namespace _Game._Scripts
             finishQuestButton.onClick.AddListener(FinishQuest);
             finishQuestButton.interactable = false;
 
-            
-            objective1.onClick.AddListener(PressToSubmit1);
-            objective2.onClick.AddListener(PressToSubmit2);
-            objective3.onClick.AddListener(PressToSubmit3);
+            objective1.onClick.AddListener(() => TryToSubmitObjective(allObjectives[0]));
+            objective2.onClick.AddListener(() => TryToSubmitObjective(allObjectives[1]));
+            objective3.onClick.AddListener(() => TryToSubmitObjective(allObjectives[2]));
             
             objective1.interactable = objective2.interactable = objective3.interactable = false;
 
-            moneyText.text = $"{_currentMoney}";;
+            moneyText.text = $"{_currentMoney}";
         }
-
-
+        
         #region QuestManagement
 
         /// <summary>
@@ -146,24 +163,13 @@ namespace _Game._Scripts
         {
             if (_currentQuestIndex >= quests.Count)
             {
-                TooltipActionEvent?.Invoke("No more quests");
+                TooltipActionEvent?.Invoke(tooltipTextSO.NoMoreQuest);
                 return;
             }
 
             _currentQuest = quests[_currentQuestIndex];
-
-            _isQuestActive = true;
             _currentQuestIndex++;
-            
-            QuestActiveEvent?.Invoke(_currentQuest);
-            TooltipActionEvent?.Invoke($"{_currentQuest.NameQuest} was activated");
-
-
-            activateQuestButton.interactable = false;
-            finishQuestButton.interactable = true;
-            
-            objective1.interactable = objective2.interactable = objective3.interactable = true;
-
+            ChangeQuestActiveState(true);
         }
         
         /// <summary>
@@ -172,15 +178,10 @@ namespace _Game._Scripts
         /// <param name="objective"></param>
         private void TryToSubmitObjective(ObjectiveSO objective)
         {
-            if(!IsQuestActive) return;
-            
-            if (_currentQuest.Objective.Contains(objective))
-            {
-                if (CheckDuplicate(objective))
-                    SubmitObjective(objective);
-            }
+            if (_currentQuest.Objective.Contains(objective) && CanAcceptObjective(objective))
+                SubmitObjective(objective);
             else
-                TooltipActionEvent?.Invoke("Wrong objective");
+                TooltipActionEvent?.Invoke(tooltipTextSO.WrongObjective);
         }
 
         /// <summary>
@@ -190,9 +191,10 @@ namespace _Game._Scripts
         private void SubmitObjective(ObjectiveSO objective)
         {
             _submittedObjectives.Add(objective);
+            
             ObjectiveSubmittedEvent?.Invoke();
-            TooltipActionEvent?.Invoke($"{objective.NameObjective} was submitted");
-
+            string endValue = string.Format(tooltipTextSO.ObjectiveSubmitted, objective.ObjectiveName); 
+            TooltipActionEvent?.Invoke(endValue);
             
             if (_submittedObjectives.Count == _currentQuest.Objective.Count)
                 FinishQuest();
@@ -203,21 +205,21 @@ namespace _Game._Scripts
         /// </summary>
         /// <param name="objective"></param>
         /// <returns></returns>
-        private bool CheckDuplicate(ObjectiveSO objective)
+        private bool CanAcceptObjective(ObjectiveSO objective)
         {
             int count1 = 0, count2 = 0;
 
             for (int i = 0; i < _currentQuest.Objective.Count; i++)
-                if (_currentQuest.Objective[i].NameObjective.Equals(objective.NameObjective))
+                if (_currentQuest.Objective[i].ObjectiveName.Equals(objective.ObjectiveName))
                     count1++;
-
-            for (int i = 0; i < _submittedObjectives.Count; i++)
-                if (_submittedObjectives[i].NameObjective.Equals(objective.NameObjective))
-                    count2++;
             
             if (count1 == 0)
                 return false;
-            
+
+            for (int i = 0; i < _submittedObjectives.Count; i++)
+                if (_submittedObjectives[i].ObjectiveName.Equals(objective.ObjectiveName))
+                    count2++;
+
             return count1 > count2;
         }
 
@@ -228,31 +230,41 @@ namespace _Game._Scripts
         {
             _currentMoney += _currentQuest.RewardQuest;
             moneyText.text = $"{_currentMoney}";
-            
-            TooltipActionEvent?.Invoke($"{_currentQuest.NameQuest} was finished");
-
-            _isQuestActive = false;
 
             _submittedObjectives.Clear();
-            QuestFinishedEvent?.Invoke();
-            
-            activateQuestButton.interactable = true;
-            finishQuestButton.interactable = false;
 
-            objective1.interactable = objective2.interactable = objective3.interactable = false;
+            ChangeQuestActiveState(false);
+        }
+
+        /// <summary>
+        /// Change state of current quest
+        /// </summary>
+        /// <param name="newState"></param>
+        private void ChangeQuestActiveState(bool newState)
+        {
+            _isQuestActive = newState;
+
+            activateQuestButton.interactable = !newState;
+            finishQuestButton.interactable = newState;
+
+            objective1.interactable = objective2.interactable = objective3.interactable = newState;
+            
+            if (newState)
+            {
+                string endValue = string.Format(tooltipTextSO.QuestActive, _currentQuest.QuestName); 
+
+                QuestActiveEvent?.Invoke(_currentQuest);
+                TooltipActionEvent?.Invoke(endValue);
+            }
+            else
+            {
+                string endValue = string.Format(tooltipTextSO.QuestFinished, _currentQuest.QuestName); 
+                
+                QuestFinishedEvent?.Invoke();
+                TooltipActionEvent?.Invoke(endValue);
+            }
         }
         
-        #endregion
-
-
-        #region SubmitObjective
-
-        private void PressToSubmit1() => TryToSubmitObjective(allObjectives[0]);
-
-        private void PressToSubmit2() => TryToSubmitObjective(allObjectives[1]);
-        
-        private void PressToSubmit3() => TryToSubmitObjective(allObjectives[2]);
-
         #endregion
     }
 }

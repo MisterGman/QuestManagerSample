@@ -8,12 +8,12 @@ namespace _Game._Scripts
     {
         [field : SerializeField,
                  Tooltip("Name of Quest")]
-        private string nameQuest;
+        private string questName;
 
         /// <summary>
         /// Name of Quest
         /// </summary>
-        public string NameQuest => nameQuest;
+        public string QuestName => questName;
 
         [field : SerializeField,
                  Tooltip("All objectives for this quest")]

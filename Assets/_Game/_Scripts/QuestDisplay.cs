@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace _Game._Scripts
 {
-    public class QuestCurrent : MonoBehaviour
+    public class QuestDisplay : MonoBehaviour
     {
         #region Variables
 
@@ -65,13 +65,6 @@ namespace _Game._Scripts
         private Button toggleButton;
 
         /// <summary>
-        /// Tooltip Text
-        /// </summary>
-        [field : SerializeField,
-                 Tooltip("Tooltip Text")]
-        private TextMeshProUGUI tooltipText;
-        
-        /// <summary>
         /// Quest manager's cache
         /// </summary>
         [field : SerializeField,
@@ -86,8 +79,7 @@ namespace _Game._Scripts
         private float durationMovement = 1f;
         
         #endregion
-
-
+        
         #region Private
 
         /// <summary>
@@ -97,60 +89,46 @@ namespace _Game._Scripts
         private Vector3 _defaultPos;
         
         /// <summary>
-        /// Current quest from Quest manager
-        /// </summary>
-        private QuestSO _currQuest;
-        
-        /// <summary>
         /// All images from the objectiveImages 
         /// </summary>
-        private List<List<Image>> _listImages = new List<List<Image>>();
+        private List<List<Image>> _listOfObjectiveImages = new List<List<Image>>();
+
+        private const float DefaultScreenWidth = 1920f;
         
-        /// <summary>
-        /// Normalization of resolution
-        /// </summary>
         private float _normWindow;
 
-        /// <summary>
-        /// Notify if UI is visible on the screen
-        /// </summary>
-        private bool _isDisplayed;
+        private bool _isDisplayVisible;
+        
+        private QuestSO _currQuest;
 
         /// <summary>
-        /// Default scaling of the UI
+        /// Tweener is for stopping DOMove and to reset it.
         /// </summary>
-        private readonly float _defaultWidthForScaling = 1920f;
-
         private TweenerCore<Vector3, Vector3, VectorOptions> _tweener;
         
         #endregion
-
         
         #endregion
-        
-        
+
         private void Start()
         {
             currentQuestRectTrans.gameObject.SetActive(false);
         
             for (int i = 0; i < objectiveImages.Count; i++)
-                _listImages.Add( objectiveImages[i].GetComponentsInChildren<Image>().ToList());
+                _listOfObjectiveImages.Add( objectiveImages[i].GetComponentsInChildren<Image>().ToList());
             
-            questMan.QuestActiveEvent += ActiveQuestHandler;
-            questMan.QuestFinishedEvent += NonActiveQuestHandler;
+            questMan.QuestActiveEvent        += ActiveQuestHandler;
+            questMan.QuestFinishedEvent      += NonActiveQuestHandler;
             questMan.ObjectiveSubmittedEvent += SubmittedObjectiveHandler;
-            questMan.TooltipActionEvent += TooltipText;
- 
+            toggleButton.onClick.AddListener(ToggleCurrentQuestDisplayHandler);
+
             keyAction = new KeyAction();
             keyAction.ToggleUI.Tab.performed += context => ToggleCurrentQuestDisplayHandler();
             keyAction.Enable();
             
-            toggleButton.onClick.AddListener(ToggleCurrentQuestDisplayHandler);
-            
             PositionUpdateResolution();
         }
-
-
+        
         #region Handlers
         
         /// <summary>
@@ -158,10 +136,10 @@ namespace _Game._Scripts
         /// </summary>
         private void ActiveQuestHandler(QuestSO questSo)
         {
-            for (int i = _listImages.Count- 1; i >= 0; i--)
-            for (int j =  _listImages[i].Count-1; j >= 0; j--)
+            for (int i = _listOfObjectiveImages.Count - 1; i >= 0; i--)
+            for (int j = _listOfObjectiveImages[i].Count - 1; j >= 0; j--)
             {
-                _listImages[i][j].gameObject.SetActive(false);
+                _listOfObjectiveImages[i][j].gameObject.SetActive(false);
                 objectiveListText[i].gameObject.SetActive(false);
             }
 
@@ -169,12 +147,12 @@ namespace _Game._Scripts
             
             _currQuest = questSo;
             
-            questNameText.text = _currQuest.NameQuest;
+            questNameText.text = _currQuest.QuestName;
         
             // Set objective name visible on the UI
             for (int i = 0; i < _currQuest.Objective.Count; i++)
             {
-                objectiveListText[i].text = _currQuest.Objective[i].NameObjective;
+                objectiveListText[i].text = _currQuest.Objective[i].ObjectiveName;
                 objectiveListText[i].gameObject.SetActive(true);
             }
 
@@ -182,9 +160,9 @@ namespace _Game._Scripts
             for (int i = 0; i < _currQuest.Objective.Count; i++)
             for (int j = 0; j < _currQuest.Objective[i].SpriteDescription.Count; j++)
             {
-                _listImages[i][0].gameObject.SetActive(true);
-                _listImages[i][j + 1].sprite = _currQuest.Objective[i].SpriteDescription[j];
-                _listImages[i][j+1].gameObject.SetActive(true);
+                _listOfObjectiveImages[i][0].gameObject.SetActive(true);
+                _listOfObjectiveImages[i][j + 1].sprite = _currQuest.Objective[i].SpriteDescription[j];
+                _listOfObjectiveImages[i][j+1].gameObject.SetActive(true);
             }
             
             moneyText.text = $"{questSo.RewardQuest}";
@@ -196,7 +174,7 @@ namespace _Game._Scripts
         private void NonActiveQuestHandler()
         {
             currentQuestRectTrans.gameObject.SetActive(false);
-            _isDisplayed = false;
+            _isDisplayVisible = false;
 
             var position = currentQuestRectTrans.position;
             position = new Vector3(_defaultPos.x, position.y, position.z);
@@ -211,9 +189,9 @@ namespace _Game._Scripts
         {
             if(!questMan.IsQuestActive) return;
             
-            _isDisplayed = !_isDisplayed;
+            _isDisplayVisible = !_isDisplayVisible;
 
-            if (_isDisplayed)
+            if (_isDisplayVisible)
             {
                 var rect = currentQuestRectTrans.rect;
                 var endVal = _defaultPos.x - rect.width * _normWindow;
@@ -240,33 +218,22 @@ namespace _Game._Scripts
             var objList = new List<string>();
         
             for (int i = 0; i < _currQuest.Objective.Count; i++)
-                objList.Add(_currQuest.Objective[i].NameObjective);
-        
-            Debug.Log("===");
-
+                objList.Add(_currQuest.Objective[i].ObjectiveName);
+            
             for (int i = 0; i < questMan.SubmittedObjectives.Count; i++)
             for (int j = 0; j < _currQuest.Objective.Count; j++)
-                if (questMan.SubmittedObjectives[i].NameObjective.Equals(objList[j]))
+                if (questMan.SubmittedObjectives[i].ObjectiveName.Equals(objList[j]))
                 {
                     objectiveListText[j].text = objList[j].Replace
                     (
-                        questMan.SubmittedObjectives[i].NameObjective,
-                        $"<b><s>{questMan.SubmittedObjectives[i].NameObjective}</s></b>"
+                        questMan.SubmittedObjectives[i].ObjectiveName,
+                        $"<b><s>{questMan.SubmittedObjectives[i].ObjectiveName}</s></b>"
                     );
 
                     break;
                 }
         }
 
-        /// <summary>
-        /// Set text in the tooltip
-        /// </summary>
-        /// <param name="text"></param>
-        private void TooltipText(string text)
-        {
-            tooltipText.text = text;
-        }
-        
         #endregion
         
         #region Helpers
@@ -276,14 +243,14 @@ namespace _Game._Scripts
         /// </summary>
         private void PositionUpdateResolution()
         {
-            _normWindow = Screen.width / _defaultWidthForScaling;
+            _normWindow = Screen.width / DefaultScreenWidth;
         
             var rect = currentQuestRectTrans.rect;
             
-            _defaultPos.x = _defaultWidthForScaling * _normWindow + rect.width/(2/_normWindow);
+            _defaultPos.x = DefaultScreenWidth * _normWindow + rect.width / (2 / _normWindow);
             
             _tweener.Kill();
-            _tweener = !_isDisplayed 
+            _tweener = !_isDisplayVisible 
                 ? currentQuestRectTrans.DOMoveX(_defaultPos.x, durationMovement)
                 : currentQuestRectTrans.DOMoveX(_defaultPos.x - rect.width * _normWindow, durationMovement);
         }

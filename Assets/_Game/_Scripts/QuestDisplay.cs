@@ -102,7 +102,7 @@ namespace _Game._Scripts
         private QuestSO _currQuest;
 
         /// <summary>
-        /// Tweener is for stopping DOMove and to reset it.
+        /// Tweener is for moving RectTransform of QuestDisplay
         /// </summary>
         private TweenerCore<Vector3, Vector3, VectorOptions> _tweener;
         
